@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -8,7 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const uri = "mongodb+srv://souvikdey3105:K4MiXiIKRXVGMLJo@cluster0.u23cvvf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGODB_URL
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -20,6 +21,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    console.log("Database connected")
     const postCollection = client.db('database').collection('posts')
     const userCollection = client.db('database').collection('users');
 

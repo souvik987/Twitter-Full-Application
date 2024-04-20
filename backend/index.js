@@ -2,6 +2,8 @@ const express = require('express')
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
+const bcrypt = require('bcrypt');
+const {v4: uuidv4} = require('uuid');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -39,7 +41,23 @@ async function run() {
     app.get('/loggedInUser', async(req, res) => {
       const email = req.query.email;
       const user = await userCollection.find({email:email}).toArray();
-      res.send(user);
+
+      // //Log user login history
+      const loginInfo = {
+        id: uuidv4(),
+        ipAddress: bcrypt.hashSync(req.ip, 10), // Hash the IP address
+        timestamp: new Date().toISOString()
+      }; 
+
+      await userCollection.updateOne(
+        { email },
+        { $push: {loginHistory: loginInfo} }
+      );
+     // res.send(user);
+     res.json({
+      email: user.email,
+      loginHistory: user.loginHistory
+    });
     })
 
     app.get('/userPost', async(req, res) => {
